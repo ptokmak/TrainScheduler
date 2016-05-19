@@ -1,7 +1,7 @@
 //Link to Firebase
 var trainData = new Firebase("https://burning-torch-3473.firebaseio.com/");
 
-//Button for adding new Schedules
+//Button for adding new schedules
  $("#addTrainBtn").on("click", function(){
 
 		// Grabs user input
