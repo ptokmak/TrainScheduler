@@ -7,8 +7,11 @@ var trainData = new Firebase("https://burning-torch-3473.firebaseio.com/");
 		// Grabs user input
 		var trainName = $("#trainNameInput").val().trim();
 		var trainDest = $("#destinationInput").val().trim();
-		var trainStart = $("#startInput").val().trim();
-		var trainFreq = $("#frequencyInput").val().trim();
+		// var trainStart = $("#startInput").val().trim();
+
+		var trainStart =  moment($("#startInput").val().trim(), "HH:mm").format("X");
+		var trainFreq = moment($("#frequencyInput").val().trim(), "minutes").format("mm");
+		console.log(trainFreq);
 
 		//Creates local "temporary" object for holding employee data
 		var newTrain ={
@@ -28,7 +31,7 @@ var trainData = new Firebase("https://burning-torch-3473.firebaseio.com/");
 		console.log(newTrain.tFreq);
 
 		// Alert
-		alert("New Train Schedulesuccessfully added");
+		alert("New Train Schedule successfully added");
 
 		// Clears all of the text-boxes
 		$("#trainNameInput").val("");
@@ -40,7 +43,7 @@ var trainData = new Firebase("https://burning-torch-3473.firebaseio.com/");
 		return false;
 });
 
-//Create Firebase event for adding employee to the database and a row in the html when a user adds an entry
+//Create Firebase event for adding new schedule to the database and a row in the html when a user adds an entry
 trainData.on("child_added", function(childSnapshot, prevChildKey){
 
 	console.log(childSnapshot.val());
@@ -57,4 +60,39 @@ trainData.on("child_added", function(childSnapshot, prevChildKey){
 	console.log(trainStart);
 	console.log(trainFreq);
 
+
+	//DTime difference between "now" and first train schedule
+	var tDiff = moment().diff(moment.unix(trainStart, 'X'), "minutes");
+	console.log(tDiff);
+
+	//Format the entered frequency
+	var trainFreqFormatted = moment.unix(trainFreq, 'minutes');
+	console.log(trainFreqFormatted);
+
+	//Find time remainder 
+	var timeRemainder = tDiff % trainFreqFormatted; 
+		console.log(timeRemainder);
+
+	//Minutes Away from next train
+	var minsAway = trainFreqFormatted - timeRemainder;
+	console.log( minsAway);
+
+	//Format the minutes away
+	var minsAwayFormatted = moment.unix(minsAway).format("mm");
+		console.log( minsAwayFormatted);
+
+	//Time for next train 
+	var nextTrain = moment().add(minsAway, "minutes");
+		
+	//Next Arrival time in military time format
+	var nextArrival = moment(nextTrain).format("HH:mm");
+
+	// Add each train's data into the table 
+	$("#trainTable > tbody").append("<tr><td>" 
+		+ trainName + "</td><td>" 
+		+ trainDest + "</td><td>" 
+		+ trainFreq + "</td><td>" 
+		+ nextArrival + "</td><td>" 
+		+ minsAwayFormatted + "</td></tr>");
+	
 });
